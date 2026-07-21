@@ -12,10 +12,6 @@ dist
 dist-ssr
 *.local
 
-# Environment variables (contient les identifiants de connexion)
-.env
-!.env.example
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
