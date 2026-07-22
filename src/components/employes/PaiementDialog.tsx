@@ -11,8 +11,9 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { SelecteurDate } from "@/components/common/SelecteurDate"
 import { enregistrerPaiement } from "@/lib/actions"
-import { calculerJours, dateFinEstimee } from "@/lib/business"
+import { calculerJours, dateFinEstimee, today } from "@/lib/business"
 import { formatDate, formatMontant } from "@/lib/format"
 import { PRIX_REPAS } from "@/lib/constants"
 import type { Employe } from "@/lib/types"
@@ -27,10 +28,14 @@ const MONTANTS_RAPIDES = [500, 1000, 2500, 5000, 10000]
 
 export function PaiementDialog({ open, onOpenChange, employe }: PaiementDialogProps) {
   const [montant, setMontant] = useState("")
+  const [date, setDate] = useState(today())
   const [enregistrement, setEnregistrement] = useState(false)
 
   useEffect(() => {
-    if (open) setMontant("")
+    if (open) {
+      setMontant("")
+      setDate(today())
+    }
   }, [open])
 
   if (!employe) return null
@@ -38,7 +43,7 @@ export function PaiementDialog({ open, onOpenChange, employe }: PaiementDialogPr
   const montantNum = parseInt(montant, 10) || 0
   const jours = montantNum > 0 ? calculerJours(montantNum) : 0
   const nouveauSolde = employe.soldeTickets + jours
-  const apercu = montantNum > 0 ? { jours, nouveauSolde, dateFinEstimee: dateFinEstimee(nouveauSolde) } : null
+  const apercu = montantNum > 0 ? { jours, nouveauSolde, dateFinEstimee: dateFinEstimee(nouveauSolde, date || today()) } : null
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -50,9 +55,13 @@ export function PaiementDialog({ open, onOpenChange, employe }: PaiementDialogPr
       toast.error(`Le montant doit être un multiple de ${PRIX_REPAS} FCFA.`)
       return
     }
+    if (!date) {
+      toast.error("Veuillez sélectionner une date.")
+      return
+    }
     setEnregistrement(true)
     try {
-      await enregistrerPaiement(employe.id, montantNum)
+      await enregistrerPaiement(employe.id, montantNum, date)
       toast.success(`Paiement de ${formatMontant(montantNum)} enregistré.`)
       onOpenChange(false)
     } catch {
@@ -74,6 +83,13 @@ export function PaiementDialog({ open, onOpenChange, employe }: PaiementDialogPr
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="datePaiement">Date du paiement *</Label>
+              <SelecteurDate id="datePaiement" value={date} onChange={setDate} maxDate={new Date()} />
+              <p className="text-xs text-muted-foreground">
+                Choisissez une date passée pour enregistrer un ancien paiement.
+              </p>
+            </div>
             <div className="grid gap-2">
               <Label htmlFor="montant">Montant (FCFA) *</Label>
               <Input
