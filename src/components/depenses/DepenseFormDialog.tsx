@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { SelecteurDate } from "@/components/common/SelecteurDate"
 import { creerDepense, modifierDepense } from "@/lib/actions"
 import { today } from "@/lib/business"
 import { CATEGORIES_DEPENSES } from "@/lib/constants"
@@ -152,11 +153,11 @@ export function DepenseFormDialog({ open, onOpenChange, depense }: DepenseFormDi
 
             <div className="grid gap-2">
               <Label htmlFor="date">Date *</Label>
-              <Input
+              <SelecteurDate
                 id="date"
-                type="date"
                 value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
+                onChange={(v) => setForm({ ...form, date: v })}
+                maxDate={new Date()}
               />
             </div>
 
