@@ -22,7 +22,7 @@ export async function supprimerEmploye(id: number): Promise<void> {
   })
 }
 
-export async function enregistrerPaiement(employeId: number, montant: number): Promise<void> {
+export async function enregistrerPaiement(employeId: number, montant: number, date: string = today()): Promise<void> {
   await db.transaction("rw", db.employes, db.paiements, async () => {
     const employe = await db.employes.get(employeId)
     if (!employe) throw new Error("Employé introuvable")
@@ -32,11 +32,11 @@ export async function enregistrerPaiement(employeId: number, montant: number): P
 
     await db.paiements.add({
       employeId,
-      date: today(),
+      date,
       montant,
       jours,
       soldeApres,
-      dateFinEstimee: dateFinEstimee(soldeApres) ?? today(),
+      dateFinEstimee: dateFinEstimee(soldeApres, date) ?? date,
     })
 
     await db.employes.update(employeId, { soldeTickets: soldeApres })
