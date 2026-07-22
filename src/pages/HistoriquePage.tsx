@@ -17,6 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { ExportButton } from "@/components/common/ExportButton"
+import { SelecteurDate } from "@/components/common/SelecteurDate"
 import { usePaiementsAvecEmployes } from "@/hooks/usePaiements"
 import { formatDate, formatMontant } from "@/lib/format"
 import { exporterPaiements, type FormatExport } from "@/lib/export"
@@ -89,9 +90,9 @@ export function HistoriquePage() {
             ))}
           </SelectContent>
         </Select>
-        <Input type="date" value={dateDebut} onChange={(e) => setDateDebut(e.target.value)} className="w-[160px]" />
+        <SelecteurDate value={dateDebut} onChange={setDateDebut} maxDate={new Date()} className="w-[160px]" />
         <span className="text-sm text-muted-foreground">à</span>
-        <Input type="date" value={dateFin} onChange={(e) => setDateFin(e.target.value)} className="w-[160px]" />
+        <SelecteurDate value={dateFin} onChange={setDateFin} maxDate={new Date()} className="w-[160px]" />
       </div>
 
       <div className="rounded-md border">
