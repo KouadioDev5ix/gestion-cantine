@@ -2,7 +2,14 @@ import { useLiveQuery } from "dexie-react-hooks"
 import { db } from "@/lib/db"
 import { calculerStatut } from "@/lib/business"
 import { useAujourdhui } from "./useAujourdhui"
-import type { EmployeAvecStatut } from "@/lib/types"
+import type { Employe, EmployeAvecStatut } from "@/lib/types"
+
+export function useListeEmployes(): Employe[] | undefined {
+  return useLiveQuery(async () => {
+    const employes = await db.employes.toArray()
+    return employes.sort((a, b) => a.nom.localeCompare(b.nom))
+  }, [])
+}
 
 export function useEmployesAvecStatut(): EmployeAvecStatut[] | undefined {
   const ref = useAujourdhui()
