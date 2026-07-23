@@ -30,13 +30,15 @@ export async function enregistrerPaiement(employeId: number, montant: number, da
     const jours = calculerJours(montant)
     const soldeApres = employe.soldeTickets + jours
 
+    // "Fin estimée" est ancrée sur aujourd'hui (pas sur `date`, qui peut être rétrodatée)
+    // pour rester cohérente avec la valeur en direct affichée dans le tableau des employés.
     await db.paiements.add({
       employeId,
       date,
       montant,
       jours,
       soldeApres,
-      dateFinEstimee: dateFinEstimee(soldeApres, date) ?? date,
+      dateFinEstimee: dateFinEstimee(soldeApres) ?? today(),
     })
 
     await db.employes.update(employeId, { soldeTickets: soldeApres })
