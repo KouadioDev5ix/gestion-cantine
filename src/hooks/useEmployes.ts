@@ -1,6 +1,6 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { db } from "@/lib/db"
-import { calculerStatut, dateFinEstimee } from "@/lib/business"
+import { calculerStatut } from "@/lib/business"
 import { useAujourdhui } from "./useAujourdhui"
 import type { EmployeAvecStatut } from "@/lib/types"
 
@@ -8,18 +8,25 @@ export function useEmployesAvecStatut(): EmployeAvecStatut[] | undefined {
   const ref = useAujourdhui()
 
   return useLiveQuery(async () => {
-    const [employes, repasAujourdhui] = await Promise.all([
+    const [employes, repasAujourdhui, paiements] = await Promise.all([
       db.employes.toArray(),
       db.repas.where("date").equals(ref).toArray(),
+      db.paiements.toArray(),
     ])
     const idsAyantMange = new Set(repasAujourdhui.map((r) => r.employeId))
+
+    const dernierPaiementParEmploye = new Map<number, string>()
+    for (const p of paiements) {
+      const actuel = dernierPaiementParEmploye.get(p.employeId)
+      if (!actuel || p.date > actuel) dernierPaiementParEmploye.set(p.employeId, p.date)
+    }
 
     return employes
       .map((e) => ({
         ...e,
         statut: calculerStatut(e.soldeTickets),
-        dateFinEstimee: dateFinEstimee(e.soldeTickets, ref),
         aMangeAujourdhui: idsAyantMange.has(e.id),
+        dernierPaiement: dernierPaiementParEmploye.get(e.id) ?? null,
       }))
       .sort((a, b) => a.nom.localeCompare(b.nom))
   }, [ref])
