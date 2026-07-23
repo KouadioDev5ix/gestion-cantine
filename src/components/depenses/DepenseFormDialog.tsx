@@ -22,6 +22,7 @@ import { SelecteurDate } from "@/components/common/SelecteurDate"
 import { creerDepense, modifierDepense } from "@/lib/actions"
 import { today } from "@/lib/business"
 import { CATEGORIES_DEPENSES } from "@/lib/constants"
+import { useListeEmployes } from "@/hooks/useEmployes"
 import type { Depense } from "@/lib/types"
 
 interface DepenseFormDialogProps {
@@ -31,10 +32,12 @@ interface DepenseFormDialogProps {
 }
 
 const AUTRE = "Autre"
+const AUCUN_EMPLOYE = "aucun"
 
 const VIDE = {
   categorie: "",
   autrePrecision: "",
+  employeId: AUCUN_EMPLOYE,
   date: today(),
   prixUnitaire: "",
   quantite: "1",
@@ -44,6 +47,7 @@ export function DepenseFormDialog({ open, onOpenChange, depense }: DepenseFormDi
   const [form, setForm] = useState(VIDE)
   const [enregistrement, setEnregistrement] = useState(false)
   const estEdition = !!depense
+  const employes = useListeEmployes()
 
   useEffect(() => {
     if (!open) return
@@ -53,6 +57,7 @@ export function DepenseFormDialog({ open, onOpenChange, depense }: DepenseFormDi
       setForm({
         categorie: estCategoriePredefinie ? depense.nomArticle : AUTRE,
         autrePrecision: estCategoriePredefinie ? "" : depense.nomArticle,
+        employeId: depense.employeId !== null ? String(depense.employeId) : AUCUN_EMPLOYE,
         date: depense.date,
         prixUnitaire: String(depense.prixUnitaire),
         quantite: String(depense.quantite),
@@ -92,6 +97,7 @@ export function DepenseFormDialog({ open, onOpenChange, depense }: DepenseFormDi
     try {
       const data = {
         nomArticle: form.categorie === AUTRE ? form.autrePrecision.trim() : form.categorie,
+        employeId: form.employeId === AUCUN_EMPLOYE ? null : parseInt(form.employeId, 10),
         date: form.date,
         prixUnitaire,
         quantite,
@@ -150,6 +156,29 @@ export function DepenseFormDialog({ open, onOpenChange, depense }: DepenseFormDi
                 />
               </div>
             )}
+
+            <div className="grid gap-2">
+              <Label htmlFor="employe">Employé</Label>
+              <Select value={form.employeId} onValueChange={(v) => setForm({ ...form, employeId: v ?? AUCUN_EMPLOYE })}>
+                <SelectTrigger id="employe" className="w-full">
+                  <SelectValue placeholder="Sélectionner un employé">
+                    {(v: string) => {
+                      if (v === AUCUN_EMPLOYE || !v) return "Aucun"
+                      const emp = employes?.find((e) => String(e.id) === v)
+                      return emp ? `${emp.prenom} ${emp.nom}` : "Aucun"
+                    }}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={AUCUN_EMPLOYE}>Aucun</SelectItem>
+                  {employes?.map((emp) => (
+                    <SelectItem key={emp.id} value={String(emp.id)}>
+                      {emp.prenom} {emp.nom}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
             <div className="grid gap-2">
               <Label htmlFor="date">Date *</Label>
