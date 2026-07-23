@@ -22,13 +22,19 @@ export function calculerStatut(soldeTickets: number): StatutEmploye {
 }
 
 /**
- * Date de fin "si l'employé mange tous les jours à partir d'aujourd'hui" — une simple
- * projection indicative recalculée en direct depuis le solde de tickets, jamais stockée
- * comme source de vérité.
+ * Prolonge la période payée d'un employé lors d'un paiement, en reprenant la règle du
+ * cahier des charges : si la période précédente est déjà dépassée à la date du paiement,
+ * la nouvelle période démarre à cette date ; sinon elle démarre à l'ancienne fin (les jours
+ * déjà payés ne sont jamais perdus). Purement indicatif — n'a aucune influence sur le statut
+ * ni sur le solde de tickets, qui restent uniquement pilotés par `soldeTickets`.
  */
-export function dateFinEstimee(soldeTickets: number, reference: string = today()): string | null {
-  if (soldeTickets <= 0) return null
-  return formatISO(addDays(parseISO(reference), soldeTickets), { representation: "date" })
+export function calculerNouvelleDateFin(
+  ancienneDateFin: string | null,
+  jours: number,
+  datePaiement: string
+): string {
+  const dateDebut = !ancienneDateFin || ancienneDateFin < datePaiement ? datePaiement : ancienneDateFin
+  return formatISO(addDays(parseISO(dateDebut), jours), { representation: "date" })
 }
 
 export const STATUT_LABELS: Record<StatutEmploye, string> = {
