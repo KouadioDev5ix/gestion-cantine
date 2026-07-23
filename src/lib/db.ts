@@ -77,4 +77,21 @@ db.version(4)
       })
   })
 
+// v5 : ajout de l'employé associé à une dépense (optionnel)
+db.version(5)
+  .stores({
+    employes: "++id, &matricule, nom, prenom, service, dateCreation",
+    paiements: "++id, employeId, date",
+    repas: "++id, employeId, date, [employeId+date]",
+    depenses: "++id, nomArticle, date, employeId",
+  })
+  .upgrade(async (tx) => {
+    await tx
+      .table("depenses")
+      .toCollection()
+      .modify((depense: Depense) => {
+        depense.employeId = null
+      })
+  })
+
 export { db }
