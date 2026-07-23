@@ -2,8 +2,9 @@ import * as XLSX from "xlsx"
 import { saveAs } from "file-saver"
 import { STATUT_LABELS } from "./business"
 import { formatDate } from "./format"
-import type { Depense, EmployeAvecStatut } from "./types"
+import type { EmployeAvecStatut } from "./types"
 import type { PaiementAvecEmploye } from "@/hooks/usePaiements"
+import type { DepenseAvecEmploye } from "@/hooks/useDepenses"
 
 export type FormatExport = "xlsx" | "csv"
 
@@ -64,9 +65,10 @@ export function exporterRepas(
   telecharger(lignes, "repas", format)
 }
 
-export function exporterDepenses(depenses: Depense[], format: FormatExport) {
+export function exporterDepenses(depenses: DepenseAvecEmploye[], format: FormatExport) {
   const lignes = depenses.map((d) => ({
     Article: d.nomArticle,
+    Employé: d.employeNom ?? "",
     Date: formatDate(d.date),
     "Prix unitaire (FCFA)": d.prixUnitaire,
     Quantité: d.quantite,
