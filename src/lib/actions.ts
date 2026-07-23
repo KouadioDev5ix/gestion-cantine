@@ -1,12 +1,15 @@
 import { db } from "./db"
-import { calculerJours, dateFinEstimee, today } from "./business"
+import { calculerJours, calculerNouvelleDateFin, today } from "./business"
 import type { Depense, Employe } from "./types"
 
-export async function creerEmploye(data: Omit<Employe, "id" | "dateCreation" | "soldeTickets">): Promise<number> {
+export async function creerEmploye(
+  data: Omit<Employe, "id" | "dateCreation" | "soldeTickets" | "dateFinEstimee">
+): Promise<number> {
   return db.employes.add({
     ...data,
     dateCreation: today(),
     soldeTickets: 0,
+    dateFinEstimee: null,
   })
 }
 
@@ -29,19 +32,18 @@ export async function enregistrerPaiement(employeId: number, montant: number, da
 
     const jours = calculerJours(montant)
     const soldeApres = employe.soldeTickets + jours
+    const nouvelleDateFin = calculerNouvelleDateFin(employe.dateFinEstimee, jours, date)
 
-    // "Fin estimée" est ancrée sur aujourd'hui (pas sur `date`, qui peut être rétrodatée)
-    // pour rester cohérente avec la valeur en direct affichée dans le tableau des employés.
     await db.paiements.add({
       employeId,
       date,
       montant,
       jours,
       soldeApres,
-      dateFinEstimee: dateFinEstimee(soldeApres) ?? today(),
+      dateFinEstimee: nouvelleDateFin,
     })
 
-    await db.employes.update(employeId, { soldeTickets: soldeApres })
+    await db.employes.update(employeId, { soldeTickets: soldeApres, dateFinEstimee: nouvelleDateFin })
   })
 }
 
