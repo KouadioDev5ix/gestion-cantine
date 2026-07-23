@@ -7,6 +7,7 @@ export interface Employe {
   telephone?: string
   dateCreation: string // ISO date
   soldeTickets: number // nombre de repas restants (1 ticket = 1 repas), consommé uniquement quand le repas est pointé
+  dateFinEstimee: string | null // fin de période payée, prolongée à chaque paiement (voir calculerNouvelleDateFin) — purement indicative, ne pilote jamais le statut
 }
 
 export interface Paiement {
@@ -37,6 +38,6 @@ export type StatutEmploye = "actif" | "a_renouveler" | "expire"
 
 export interface EmployeAvecStatut extends Employe {
   statut: StatutEmploye
-  dateFinEstimee: string | null // projection en direct : aujourd'hui + soldeTickets, si consommation continue
   aMangeAujourdhui: boolean
+  dernierPaiement: string | null // date du paiement le plus récent de l'employé
 }
