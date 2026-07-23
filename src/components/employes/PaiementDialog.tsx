@@ -43,7 +43,9 @@ export function PaiementDialog({ open, onOpenChange, employe }: PaiementDialogPr
   const montantNum = parseInt(montant, 10) || 0
   const jours = montantNum > 0 ? calculerJours(montantNum) : 0
   const nouveauSolde = employe.soldeTickets + jours
-  const apercu = montantNum > 0 ? { jours, nouveauSolde, dateFinEstimee: dateFinEstimee(nouveauSolde, date || today()) } : null
+  // "Fin estimée" est toujours calculée depuis aujourd'hui (pas la date de paiement choisie,
+  // qui peut être rétrodatée) pour rester cohérente avec la valeur affichée dans le tableau des employés.
+  const apercu = montantNum > 0 ? { jours, nouveauSolde, dateFinEstimee: dateFinEstimee(nouveauSolde) } : null
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
