@@ -29,6 +29,7 @@ export interface Repas {
 export interface Depense {
   id: number
   nomArticle: string // catégorie choisie, ou texte libre si "Autre"
+  employeId: number | null // employé ayant effectué la dépense (optionnel)
   date: string // ISO date
   prixUnitaire: number
   quantite: number
