@@ -1,5 +1,5 @@
 import Dexie, { type EntityTable } from "dexie"
-import { differenceInCalendarDays, parseISO } from "date-fns"
+import { addDays, differenceInCalendarDays, formatISO, parseISO } from "date-fns"
 import { today } from "./business"
 import type { Depense, Employe, Paiement, Repas } from "./types"
 
@@ -52,5 +52,29 @@ db.version(3).stores({
   repas: "++id, employeId, date, [employeId+date]",
   depenses: "++id, nomArticle, date",
 })
+
+// v4 : réintroduction d'une "fin estimée" stockée et prolongée à chaque paiement (au lieu
+// d'être recalculée en direct depuis aujourd'hui), pour qu'elle reste cohérente entre la
+// modale de paiement et le tableau des employés. Le statut continue de dépendre uniquement
+// de soldeTickets — cette date reste purement indicative.
+db.version(4)
+  .stores({
+    employes: "++id, &matricule, nom, prenom, service, dateCreation",
+    paiements: "++id, employeId, date",
+    repas: "++id, employeId, date, [employeId+date]",
+    depenses: "++id, nomArticle, date",
+  })
+  .upgrade(async (tx) => {
+    const ref = today()
+    await tx
+      .table("employes")
+      .toCollection()
+      .modify((employe: Employe) => {
+        employe.dateFinEstimee =
+          employe.soldeTickets > 0
+            ? formatISO(addDays(parseISO(ref), employe.soldeTickets), { representation: "date" })
+            : null
+      })
+  })
 
 export { db }
