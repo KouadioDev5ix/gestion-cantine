@@ -41,7 +41,9 @@ export function DepensesPage() {
     if (!depenses) return []
     const q = recherche.trim().toLowerCase()
     if (!q) return depenses
-    return depenses.filter((d) => d.nomArticle.toLowerCase().includes(q))
+    return depenses.filter(
+      (d) => d.nomArticle.toLowerCase().includes(q) || (d.employeNom ?? "").toLowerCase().includes(q)
+    )
   }, [depenses, recherche])
 
   const totalMontant = depensesFiltrees.reduce((acc, d) => acc + d.prixUnitaire * d.quantite, 0)
@@ -88,7 +90,7 @@ export function DepensesPage() {
       <div className="relative max-w-sm">
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Rechercher une dépense…"
+          placeholder="Rechercher une dépense ou un employé…"
           value={recherche}
           onChange={(e) => setRecherche(e.target.value)}
           className="pl-8"
@@ -100,6 +102,7 @@ export function DepensesPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Article</TableHead>
+              <TableHead>Employé</TableHead>
               <TableHead>Date</TableHead>
               <TableHead>Prix unitaire</TableHead>
               <TableHead>Quantité</TableHead>
@@ -110,13 +113,13 @@ export function DepensesPage() {
           <TableBody>
             {depenses === undefined ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
                   Chargement…
                 </TableCell>
               </TableRow>
             ) : depensesFiltrees.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
                   Aucune dépense trouvée.
                 </TableCell>
               </TableRow>
@@ -124,6 +127,7 @@ export function DepensesPage() {
               depensesFiltrees.map((d) => (
                 <TableRow key={d.id}>
                   <TableCell className="font-medium">{d.nomArticle}</TableCell>
+                  <TableCell>{d.employeNom ?? "—"}</TableCell>
                   <TableCell>{formatDate(d.date)}</TableCell>
                   <TableCell>{formatMontant(d.prixUnitaire)}</TableCell>
                   <TableCell>{d.quantite}</TableCell>
