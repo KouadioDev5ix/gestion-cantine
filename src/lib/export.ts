@@ -30,6 +30,7 @@ export function exporterEmployes(employes: EmployeAvecStatut[], format: FormatEx
     Téléphone: e.telephone ?? "",
     "Date de création": formatDate(e.dateCreation),
     "Tickets restants": e.soldeTickets,
+    "Dernier paiement": formatDate(e.dernierPaiement),
     "Fin estimée": formatDate(e.dateFinEstimee),
     Statut: STATUT_LABELS[e.statut],
   }))
