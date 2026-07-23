@@ -170,6 +170,7 @@ export function EmployesPage() {
               <TableHead>Nom et prénom</TableHead>
               <TableHead>Service</TableHead>
               <TableHead>Tickets restants</TableHead>
+              <TableHead>Dernier paiement</TableHead>
               <TableHead>Fin estimée</TableHead>
               <TableHead>Statut</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -178,13 +179,13 @@ export function EmployesPage() {
           <TableBody>
             {employes === undefined ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
                   Chargement…
                 </TableCell>
               </TableRow>
             ) : employesFiltres.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
                   Aucun employé trouvé.
                 </TableCell>
               </TableRow>
@@ -197,6 +198,7 @@ export function EmployesPage() {
                   </TableCell>
                   <TableCell>{e.service}</TableCell>
                   <TableCell className="font-medium">{e.soldeTickets}</TableCell>
+                  <TableCell>{formatDate(e.dernierPaiement)}</TableCell>
                   <TableCell>{formatDate(e.dateFinEstimee)}</TableCell>
                   <TableCell>
                     <StatutBadge statut={e.statut} />
