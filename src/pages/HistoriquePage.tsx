@@ -79,7 +79,7 @@ export function HistoriquePage() {
         </div>
         <Select value={filtreService} onValueChange={(v) => setFiltreService(v ?? "tous")}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Service" />
+            <SelectValue placeholder="Service">{(v: string) => (v === "tous" ? "Tous les services" : v)}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="tous">Tous les services</SelectItem>
