@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { SelecteurDate } from "@/components/common/SelecteurDate"
 import { enregistrerPaiement } from "@/lib/actions"
-import { calculerJours, dateFinEstimee, today } from "@/lib/business"
+import { calculerJours, calculerNouvelleDateFin, today } from "@/lib/business"
 import { formatDate, formatMontant } from "@/lib/format"
 import { PRIX_REPAS } from "@/lib/constants"
 import type { Employe } from "@/lib/types"
@@ -43,9 +43,12 @@ export function PaiementDialog({ open, onOpenChange, employe }: PaiementDialogPr
   const montantNum = parseInt(montant, 10) || 0
   const jours = montantNum > 0 ? calculerJours(montantNum) : 0
   const nouveauSolde = employe.soldeTickets + jours
-  // "Fin estimée" est toujours calculée depuis aujourd'hui (pas la date de paiement choisie,
-  // qui peut être rétrodatée) pour rester cohérente avec la valeur affichée dans le tableau des employés.
-  const apercu = montantNum > 0 ? { jours, nouveauSolde, dateFinEstimee: dateFinEstimee(nouveauSolde) } : null
+  // Même calcul (et mêmes entrées) que ce qui sera stocké par enregistrerPaiement, pour que
+  // l'aperçu corresponde exactement à ce qui s'affichera ensuite dans le tableau des employés.
+  const apercu =
+    montantNum > 0
+      ? { jours, nouveauSolde, dateFinEstimee: calculerNouvelleDateFin(employe.dateFinEstimee, jours, date || today()) }
+      : null
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
